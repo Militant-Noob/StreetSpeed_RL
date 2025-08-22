@@ -4,38 +4,148 @@
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Unity Web Player | StreetSpeed</title>
+    <style>
+      body {
+        background-color: black;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        overflow: hidden;
+      }
+      #game-container {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      #unity-canvas {
+        width: 1920px;
+        height: 1080px;
+        background: #231F20;
+      }
+      #fullscreen-button {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 12px;
+        border: none;
+        background-color: #4CAF50;
+        color: white;
+        transition: background-color 0.3s, transform 0.3s;
+      }
+      #fullscreen-button:hover {
+        background-color: #45a049;
+        transform: translateX(-50%) scale(1.05);
+      }
+      #loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #231F20;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 2;
+      }
+      #loading-bar-container {
+        width: 50%;
+        height: 20px;
+        background: #1a1a1a;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      #loading-bar {
+        width: 0%;
+        height: 100%;
+        background: #fff;
+      }
+      #loading-percentage {
+        color: #fff;
+        margin-top: 10px;
+      }
+    </style>
   </head>
-  <body style="text-align: center; padding: 0; border: 0; margin: 0;">
-    <canvas id="unity-canvas" width=1920 height=1080 tabindex="-1" style="width: 1920px; height: 1080px; background: #231F20"></canvas>
-    <script src="Build/StreetSpeedWebGL.loader.js"></script>
+  <body>
+    <div id="loading-overlay">
+      <div>
+        <div id="loading-bar-container">
+          <div id="loading-bar"></div>
+        </div>
+        <div id="loading-percentage">0%</div>
+      </div>
+    </div>
+    <div id="game-container">
+      <canvas id="unity-canvas" width="1920" height="1080" tabindex="-1"></canvas>
+    </div>
+    <button id="fullscreen-button">Fullscreen</button>
+    <script src="Build/StreetSpeed.loader.js"></script>
     <script>
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        // Mobile device style: fill the whole browser client area with the game canvas:
-        var meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-        document.getElementsByTagName('head')[0].appendChild(meta);
+      const canvas = document.querySelector("#unity-canvas");
+      const fullscreenButton = document.querySelector("#fullscreen-button");
+      const gameContainer = document.querySelector("#game-container");
+      const loadingOverlay = document.getElementById('loading-overlay');
+      const loadingBar = document.getElementById('loading-bar');
+      const loadingPercentage = document.getElementById('loading-percentage');
 
-        var canvas = document.querySelector("#unity-canvas");
-        canvas.style.width = "100%";
-        canvas.style.height = "100%";
-        canvas.style.position = "fixed";
+      function resize() {
+        const { innerWidth: w, innerHeight: h } = window;
+        const r = 1080 / 1920;
 
-        document.body.style.textAlign = "left";
+        if (w / h < 1920 / 1080) {
+          canvas.style.width = w + "px";
+          canvas.style.height = w * r + "px";
+        } else {
+          canvas.style.height = h + "px";
+          canvas.style.width = h / r + "px";
+        }
       }
 
-      createUnityInstance(document.querySelector("#unity-canvas"), {
+      window.addEventListener("resize", resize);
+      resize();
+
+      fullscreenButton.addEventListener("click", () => {
+        if (document.fullscreenElement) {
+          document.exitFullscreen();
+        } else {
+          gameContainer.requestFullscreen();
+        }
+      });
+
+      createUnityInstance(canvas, {
         arguments: [],
-        dataUrl: "https://media.githubusercontent.com/media/0xUgly/StreetSpeed_RL/main/Build/StreetSpeedWebGL.data",
-        frameworkUrl: "Build/StreetSpeedWebGL.framework.js",
-        codeUrl: "Build/StreetSpeedWebGL.wasm",
+        dataUrl: "Build/StreetSpeed.data",
+        frameworkUrl: "Build/StreetSpeed.framework.js",
+        codeUrl: "Build/StreetSpeed.wasm",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "StreetSpeed",
         productVersion: "1.14",
-        // matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
-        // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
+      }).then(() => {
+        loadingOverlay.style.display = 'none';
+      }).catch((message) => {
+        alert(message);
       });
+
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 10;
+        loadingBar.style.width = progress + '%';
+        loadingPercentage.textContent = progress + '%';
+        if (progress >= 100) {
+          clearInterval(interval);
+        }
+      }, 500);
     </script>
   </body>
 </html>
