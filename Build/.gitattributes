@@ -1,2 +1,1 @@
-*StreetSpeed.data filter=lfs diff=lfs merge=lfs -text
-*StreetSpeed.wasn filter=lfs diff=lfs merge=lfs -text
+*RaSei.data filter=lfs diff=lfs merge=lfs -text

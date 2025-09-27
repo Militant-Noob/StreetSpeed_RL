@@ -3,149 +3,262 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity Web Player | StreetSpeed</title>
+    <title>StreetSpeed RL</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <style>
       body {
-        background-color: black;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
         margin: 0;
+        padding: 0;
         overflow: hidden;
+        background-color: #000000;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       }
-      #game-container {
-        position: relative;
-        width: 100vw;
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-      #unity-canvas {
-        width: 1920px;
-        height: 1080px;
-        background: #231F20;
-      }
-      #fullscreen-button {
-        position: absolute;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        padding: 10px 20px;
-        font-size: 16px;
-        cursor: pointer;
-        border-radius: 12px;
-        border: none;
-        background-color: #4CAF50;
-        color: white;
-        transition: background-color 0.3s, transform 0.3s;
-      }
-      #fullscreen-button:hover {
-        background-color: #45a049;
-        transform: translateX(-50%) scale(1.05);
-      }
-      #loading-overlay {
+
+      #unity-container {
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background: #231F20;
         display: flex;
         justify-content: center;
         align-items: center;
-        z-index: 2;
       }
-      #loading-bar-container {
-        width: 50%;
+
+      #unity-canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      /* Loading Screen Styles */
+      #loading-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #1a1a2e, #16213e);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        transition: opacity 0.5s ease-out;
+      }
+
+      #logo {
+        width: 300px;
+        margin-bottom: 40px;
+        animation: pulse 2s infinite;
+      }
+
+      .game-title {
+        font-size: 2.5rem;
+        color: #fff;
+        margin-bottom: 50px;
+        text-align: center;
+        text-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+        letter-spacing: 2px;
+      }
+
+      .loading-container {
+        width: 80%;
+        max-width: 600px;
+        text-align: center;
+      }
+
+      .progress-text {
+        color: #fff;
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+        height: 24px;
+      }
+
+      .progress-bar {
+        width: 100%;
         height: 20px;
-        background: #1a1a1a;
+        background-color: rgba(255, 255, 255, 0.1);
         border-radius: 10px;
         overflow: hidden;
+        position: relative;
+        box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
       }
-      #loading-bar {
-        width: 0%;
+
+      .progress-bar-fill {
         height: 100%;
-        background: #fff;
+        background: linear-gradient(90deg, #00c9ff, #92fe9d);
+        width: 0%;
+        transition: width 0.3s ease;
+        border-radius: 10px;
       }
-      #loading-percentage {
-        color: #fff;
-        margin-top: 10px;
+
+      .loading-info {
+        color: #aaa;
+        margin-top: 20px;
+        font-size: 0.9rem;
+        text-align: center;
+      }
+
+      @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      .fade-out {
+        opacity: 0;
+        pointer-events: none;
       }
     </style>
   </head>
   <body>
-    <div id="loading-overlay">
-      <div>
-        <div id="loading-bar-container">
-          <div id="loading-bar"></div>
+    <div id="loading-screen">
+      <h1 class="game-title">StreetSpeed RL</h1>
+      <div class="loading-container">
+        <div class="progress-text" id="progress-text">Initializing...</div>
+        <div class="progress-bar">
+          <div class="progress-bar-fill" id="progress-bar-fill"></div>
         </div>
-        <div id="loading-percentage">0%</div>
+        <div class="loading-info">Preparing your racing experience...<br>The game is about 650MB, please be patient</div>
       </div>
     </div>
-    <div id="game-container">
-      <canvas id="unity-canvas" width="1920" height="1080" tabindex="-1"></canvas>
+
+    <div id="unity-container">
+      <canvas id="unity-canvas"></canvas>
     </div>
-    <button id="fullscreen-button">Fullscreen</button>
-    <script src="Build/StreetSpeed.loader.js"></script>
+
+    <script src="Build/RaSei.loader.js"></script>
     <script>
-      const canvas = document.querySelector("#unity-canvas");
-      const fullscreenButton = document.querySelector("#fullscreen-button");
-      const gameContainer = document.querySelector("#game-container");
-      const loadingOverlay = document.getElementById('loading-overlay');
-      const loadingBar = document.getElementById('loading-bar');
-      const loadingPercentage = document.getElementById('loading-percentage');
+      // Get DOM elements
+      const loadingScreen = document.getElementById('loading-screen');
+      const progressBarFill = document.getElementById('progress-bar-fill');
+      const progressText = document.getElementById('progress-text');
+      
+      // Set canvas to fullscreen dimensions
+      const canvas = document.getElementById('unity-canvas');
+      function setCanvasSize() {
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        
+        // Set canvas attributes to match the window size for proper rendering
+        canvas.width = width;
+        canvas.height = height;
+        // Set CSS style to take up full viewport
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        
+        // If Unity is already loaded, try to update its canvas size
+        if (window.unityInstance) {
+          window.unityInstance.SetFullscreen();
+        }
+      }
+      
+      // Initialize canvas size
+      setCanvasSize();
+      
+      // Handle window resize
+      window.addEventListener('resize', setCanvasSize);
 
-      function resize() {
-        const { innerWidth: w, innerHeight: h } = window;
-        const r = 1080 / 1920;
-
-        if (w / h < 1920 / 1080) {
-          canvas.style.width = w + "px";
-          canvas.style.height = w * r + "px";
-        } else {
-          canvas.style.height = h + "px";
-          canvas.style.width = h / r + "px";
+      // Handle fullscreen functionality
+      function requestFullscreen() {
+        const element = canvas;
+        if (element.requestFullscreen) {
+          element.requestFullscreen();
+        } else if (element.webkitRequestFullscreen) {
+          element.webkitRequestFullscreen();
+        } else if (element.mozRequestFullScreen) {
+          element.mozRequestFullScreen();
+        } else if (element.msRequestFullscreen) {
+          element.msRequestFullscreen();
         }
       }
 
-      window.addEventListener("resize", resize);
-      resize();
+      // Auto-enter fullscreen on game start for better experience
+      window.addEventListener('load', function() {
+        // Attempt to make the canvas take up the full screen
+        canvas.style.position = 'fixed';
+        canvas.style.top = '0';
+        canvas.style.left = '0';
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+      });
 
-      fullscreenButton.addEventListener("click", () => {
-        if (document.fullscreenElement) {
-          document.exitFullscreen();
+      // Handle game loading progress
+      function showProgress(value, message) {
+        // Ensure value is between 0 and 100
+        value = Math.min(100, Math.max(0, value));
+        
+        // Update progress bar
+        progressBarFill.style.width = value + '%';
+        
+        // Update progress text
+        if (message) {
+          progressText.textContent = message;
         } else {
-          gameContainer.requestFullscreen();
+          progressText.textContent = Math.round(value) + '% loaded';
         }
-      });
+      }
 
+      // Handle game loaded
+      function onGameLoaded() {
+        // Fade out loading screen
+        loadingScreen.classList.add('fade-out');
+        
+        // Remove loading screen after fade out animation completes
+        setTimeout(() => {
+          loadingScreen.style.display = 'none';
+        }, 500);
+      }
+
+      // Initialize Unity with progress tracking
       createUnityInstance(canvas, {
-        arguments: [],
-        dataUrl: "https://media.githubusercontent.com/media/0xUgly/StreetSpeed_RL/main/Build/StreetSpeed.data",
-        frameworkUrl: "Build/StreetSpeed.framework.js",
-        codeUrl: "Build/StreetSpeed.wasm",
+        dataUrl: "Build/RaSei.data",
+        frameworkUrl: "Build/RaSei.framework.js", 
+        codeUrl: "Build/RaSei.wasm",
         streamingAssetsUrl: "StreamingAssets",
-        companyName: "DefaultCompany",
-        productName: "StreetSpeed",
-        productVersion: "1.14",
-      }).then(() => {
-        loadingOverlay.style.display = 'none';
-      }).catch((message) => {
-        alert(message);
+        companyName: "RuptureLabs",
+        productName: "StreetSpeed RL",
+        productVersion: "1.0",
+        showBanner: function(message, type) {
+          // Handle Unity messages
+          console.log(message, type);
+        }
+      }, 
+      // Progress callback - Unity passes progress from 0 to 1
+      function(progress) {
+        // Unity reports progress from 0 to 1
+        let totalProgress = progress * 100;
+        
+        if (progress < 0.9) {
+          showProgress(totalProgress, `Downloading game data... ${Math.round(totalProgress)}%`);
+        } else if (progress < 1.0) {
+          showProgress(totalProgress, 'Initializing game... Please wait...');
+        } else {
+          showProgress(100, 'Starting game...');
+          setTimeout(onGameLoaded, 500);
+        }
+      }).then((unityInstance) => {
+        // Game loaded successfully
+        console.log('Game loaded successfully');
+      }).catch((error) => {
+        // Handle loading errors
+        console.error('Error loading game:', error);
+        progressText.textContent = 'Error loading game. Please refresh the page.';
+        progressText.style.color = '#ff6b6b';
       });
 
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += 10;
-        loadingBar.style.width = progress + '%';
-        loadingPercentage.textContent = progress + '%';
-        if (progress >= 100) {
-          clearInterval(interval);
-        }
-      }, 500);
+      // Mobile device adjustments
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        // Adjust canvas for mobile
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
+      }
     </script>
   </body>
 </html>
