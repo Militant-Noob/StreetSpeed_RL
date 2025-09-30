@@ -95,6 +95,7 @@
         productName: "StreetSpeed RL",
         productVersion: "1.0",
         showBanner: unityShowBanner,
+        matchWebGLToCanvasSize: false, // This prevents Unity from automatically resizing the canvas
       };
 
       // By default, Unity keeps WebGL canvas render target size matched with
@@ -158,15 +159,21 @@
           canvas.style.width = '100%';
           canvas.style.height = '100%';
           canvas.style.objectFit = 'contain';
-          // Set canvas attributes to match display size for proper rendering
-          if (window.innerWidth >= window.innerHeight * (16/9)) {
-            // Width is the limiting factor
-            canvas.width = window.innerHeight * (16/9);
-            canvas.height = window.innerHeight;
+          
+          // Calculate the optimal canvas size based on screen resolution
+          const screenWidth = screen.width;
+          const screenHeight = screen.height;
+          const screenRatio = screenWidth / screenHeight;
+          const gameRatio = 1920 / 1080; // 16:9 aspect ratio
+          
+          if (screenRatio > gameRatio) {
+            // Screen is wider than the game aspect ratio - height is the limiting factor
+            canvas.width = screenHeight * gameRatio;
+            canvas.height = screenHeight;
           } else {
-            // Height is the limiting factor
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerWidth * (9/16);
+            // Screen is taller than the game aspect ratio - width is the limiting factor
+            canvas.width = screenWidth;
+            canvas.height = screenWidth / gameRatio;
           }
         } else {
           // Not in fullscreen - use original dimensions
