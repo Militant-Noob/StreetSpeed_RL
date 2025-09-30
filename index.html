@@ -29,13 +29,11 @@
       </div>
     </div>
     
-    <!-- Fullscreen button below the canvas -->
-    <button id="fullscreen-btn">Enter Fullscreen</button>
+
 
     <script>
       var canvas = document.querySelector("#unity-canvas");
       var container = document.querySelector("#unity-container");
-      var fullscreenBtn = document.getElementById("fullscreen-btn");
       var loadingScreen = document.getElementById('loading-screen');
       var progressBarFill = document.getElementById('progress-bar-fill');
       var progressText = document.getElementById('progress-text');
@@ -203,14 +201,7 @@
           // Game loaded successfully
           setTimeout(onGameLoaded, 500);
           
-          // Add fullscreen button functionality
-          fullscreenBtn.addEventListener('click', function() {
-            document.makeFullscreen('unity-container');
-            // Update button text
-            fullscreenBtn.textContent = 'Exit Fullscreen';
-          });
-          
-          // Handle ESC key to exit fullscreen
+          // Handle ESC key to exit fullscreen (without button updates since button is removed)
           document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape' && document.fullscreenElement) {
               if (document.exitFullscreen) {
@@ -222,12 +213,10 @@
               } else if (document.msExitFullscreen) {
                 document.msExitFullscreen();
               }
-              // Update button text
-              fullscreenBtn.textContent = 'Enter Fullscreen';
             }
           });
           
-          // Update button text when fullscreen changes
+          // Update when fullscreen changes
           document.addEventListener('fullscreenchange', handleFullscreenChange);
           document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
           document.addEventListener('mozfullscreenchange', handleFullscreenChange);
@@ -238,7 +227,6 @@
                 document.webkitFullscreenElement || 
                 document.mozFullScreenElement || 
                 document.msFullscreenElement) {
-              fullscreenBtn.textContent = 'Exit Fullscreen';
               // Maintain aspect ratio when entering fullscreen
               setTimeout(maintainAspectRatio, 100); // Small delay to ensure fullscreen is established
               
@@ -247,7 +235,6 @@
                 window.unityInstance.SetFullscreen(1); // Enter fullscreen mode in Unity
               }
             } else {
-              fullscreenBtn.textContent = 'Enter Fullscreen';
               // Restore original dimensions when exiting fullscreen
               setTimeout(maintainAspectRatio, 100);
               
