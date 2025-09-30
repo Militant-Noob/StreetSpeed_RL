@@ -13,10 +13,36 @@ body {
   overflow: hidden;
   z-index: 10; /* Ensure game container is above background */
 }
-#unity-container.unity-desktop { left: 50%; top: 50%; transform: translate(-50%, -50%) }
+#unity-container.unity-desktop { left: 50%; top: 50%; transform: translate(-50%, -50%); width: 1920px; height: 1080px; }
 #unity-container.unity-mobile { position: fixed; width: 100%; height: 100% }
-#unity-canvas { background: url('BG.png') no-repeat center center; background-size: cover; }
+#unity-canvas { background: url('BG.png') no-repeat center center; background-size: cover; width: 100%; height: 100%; }
 .unity-mobile #unity-canvas { width: 100%; height: 100% }
+
+/* Fullscreen styles */
+:fullscreen #unity-container,
+:-webkit-full-screen #unity-container,
+:-moz-full-screen #unity-container,
+:-ms-fullscreen #unity-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  border-radius: 0;
+  box-shadow: none;
+  transform: none;
+}
+
+:fullscreen #unity-canvas,
+:-webkit-full-screen #unity-canvas,
+:-moz-full-screen #unity-canvas,
+:-ms-fullscreen #unity-canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* This ensures the canvas maintains its aspect ratio without cropping */
+}
 
 /* Loading Screen Styles */
 #loading-screen {
