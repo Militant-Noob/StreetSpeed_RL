@@ -158,11 +158,23 @@
           canvas.style.width = '100%';
           canvas.style.height = '100%';
           canvas.style.objectFit = 'contain';
+          // Set canvas attributes to match display size for proper rendering
+          if (window.innerWidth >= window.innerHeight * (16/9)) {
+            // Width is the limiting factor
+            canvas.width = window.innerHeight * (16/9);
+            canvas.height = window.innerHeight;
+          } else {
+            // Height is the limiting factor
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerWidth * (9/16);
+          }
         } else {
           // Not in fullscreen - use original dimensions
           canvas.style.width = '1920px';
           canvas.style.height = '1080px';
           canvas.style.objectFit = 'none';
+          canvas.width = 1920;
+          canvas.height = 1080;
         }
       }
 
@@ -222,10 +234,20 @@
               fullscreenBtn.textContent = 'Exit Fullscreen';
               // Maintain aspect ratio when entering fullscreen
               setTimeout(maintainAspectRatio, 100); // Small delay to ensure fullscreen is established
+              
+              // If Unity instance is available, try to update the canvas size as well
+              if (window.unityInstance) {
+                window.unityInstance.SetFullscreen(1); // Enter fullscreen mode in Unity
+              }
             } else {
               fullscreenBtn.textContent = 'Enter Fullscreen';
               // Restore original dimensions when exiting fullscreen
               setTimeout(maintainAspectRatio, 100);
+              
+              // If Unity instance is available, try to exit fullscreen mode in Unity
+              if (window.unityInstance) {
+                window.unityInstance.SetFullscreen(0); // Exit fullscreen mode in Unity
+              }
             }
           }
 
