@@ -4,8 +4,7 @@ body {
   min-height: 100vh;
   font-family: Arial, sans-serif;
   overflow: hidden; /* Prevent scrollbars */
-  background: url('BG.png') no-repeat center center fixed;
-  background-size: cover;
+  background: #1a1a2e; /* Dark background to match game theme */
 }
 #unity-container { 
   position: absolute;
@@ -18,6 +17,93 @@ body {
 #unity-container.unity-mobile { position: fixed; width: 100%; height: 100% }
 #unity-canvas { background: url('BG.png') no-repeat center center; background-size: cover; }
 .unity-mobile #unity-canvas { width: 100%; height: 100% }
+
+/* Loading Screen Styles */
+#loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  transition: opacity 0.5s ease-out;
+}
+
+#logo {
+  width: 300px;
+  margin-bottom: 40px;
+  animation: pulse 2s infinite;
+}
+
+.game-title {
+  font-size: 2.5rem;
+  color: #fff;
+  margin-bottom: 50px;
+  text-align: center;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+  letter-spacing: 2px;
+}
+
+.loading-container {
+  width: 80%;
+  max-width: 600px;
+  text-align: center;
+}
+
+.progress-text {
+  color: #fff;
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+  height: 24px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 20px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00c9ff, #92fe9d);
+  width: 0%;
+  transition: width 0.3s ease;
+  border-radius: 10px;
+}
+
+.loading-info {
+  color: #aaa;
+  margin-top: 20px;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Old loading bar styles (in case we need them) */
 #unity-loading-bar { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: none }
 #unity-logo { width: 154px; height: 130px; background: url('unity-logo-dark.png') no-repeat center }
 #unity-progress-bar-empty { width: 141px; height: 18px; margin-top: 10px; margin-left: 6.5px; background: url('progress-bar-empty-dark.png') no-repeat center }
