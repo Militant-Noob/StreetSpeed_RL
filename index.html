@@ -8,27 +8,62 @@
     <style>
       body {
         margin: 0;
-        padding: 0;
-        overflow: hidden;
-        background-color: #000000;
+        padding: 20px;
+        overflow: auto;
+        background: linear-gradient(135deg, #1a1a2e, #0c0c14);
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
       }
 
       #unity-container {
-        position: absolute;
-        top: 0;
-        left: 0;
+        position: relative;
         width: 100%;
-        height: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
         display: flex;
         justify-content: center;
         align-items: center;
+        box-shadow: 0 0 30px rgba(0, 200, 255, 0.5);
+        border-radius: 10px;
+        overflow: hidden;
+        background: #000;
       }
 
       #unity-canvas {
         width: 100%;
-        height: 100%;
+        height: auto;
         display: block;
+        max-width: 100%;
+        border-radius: 5px;
+      }
+
+      #fullscreen-btn {
+        margin-top: 15px;
+        padding: 12px 25px;
+        font-size: 16px;
+        background: linear-gradient(135deg, #00c9ff, #92fe9d);
+        color: #000;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        font-weight: bold;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+      }
+
+      #fullscreen-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        background: linear-gradient(135deg, #00e0ff, #a2ffad);
+      }
+
+      #fullscreen-btn:active {
+        transform: translateY(1px);
       }
 
       /* Loading Screen Styles */
@@ -132,6 +167,8 @@
     <div id="unity-container">
       <canvas id="unity-canvas"></canvas>
     </div>
+    
+    <button id="fullscreen-btn">Enter Fullscreen</button>
 
     <script src="Build/RaSei.loader.js"></script>
     <script>
@@ -139,24 +176,40 @@
       const loadingScreen = document.getElementById('loading-screen');
       const progressBarFill = document.getElementById('progress-bar-fill');
       const progressText = document.getElementById('progress-text');
-      
-      // Set canvas to fullscreen dimensions
       const canvas = document.getElementById('unity-canvas');
+      const container = document.getElementById('unity-container');
+      const fullscreenBtn = document.getElementById('fullscreen-btn');
+      
+      // Function to maintain 16:9 aspect ratio
       function setCanvasSize() {
-        const width = window.innerWidth;
-        const height = window.innerHeight;
+        const maxWidth = window.innerWidth * 0.9; // Max width is 90% of viewport width
+        const maxHeight = window.innerHeight * 0.8; // Max height is 80% of viewport height
         
-        // Set canvas attributes to match the window size for proper rendering
+        // Calculate dimensions maintaining 16:9 aspect ratio
+        let width, height;
+        
+        // Determine which constraint (width or height) is limiting
+        const widthBasedHeight = maxWidth * (9/16);
+        const heightBasedWidth = maxHeight * (16/9);
+        
+        if (widthBasedHeight <= maxHeight) {
+          // Width is the limiting factor
+          width = maxWidth;
+          height = widthBasedHeight;
+        } else {
+          // Height is the limiting factor
+          height = maxHeight;
+          width = heightBasedWidth;
+        }
+        
+        // Apply dimensions to the canvas
         canvas.width = width;
         canvas.height = height;
-        // Set CSS style to take up full viewport
-        canvas.style.width = '100%';
-        canvas.style.height = '100%';
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
         
-        // If Unity is already loaded, try to update its canvas size
-        if (window.unityInstance) {
-          window.unityInstance.SetFullscreen();
-        }
+        // Update the container to match canvas dimensions
+        container.style.width = width + 'px';
       }
       
       // Initialize canvas size
@@ -167,27 +220,55 @@
 
       // Handle fullscreen functionality
       function requestFullscreen() {
-        const element = canvas;
-        if (element.requestFullscreen) {
-          element.requestFullscreen();
-        } else if (element.webkitRequestFullscreen) {
-          element.webkitRequestFullscreen();
-        } else if (element.mozRequestFullScreen) {
-          element.mozRequestFullScreen();
-        } else if (element.msRequestFullscreen) {
-          element.msRequestFullscreen();
+        if (!document.fullscreenElement) {
+          const element = document.documentElement;
+          if (element.requestFullscreen) {
+            element.requestFullscreen();
+          } else if (element.webkitRequestFullscreen) {
+            element.webkitRequestFullscreen();
+          } else if (element.mozRequestFullScreen) {
+            element.mozRequestFullScreen();
+          } else if (element.msRequestFullscreen) {
+            element.msRequestFullscreen();
+          }
+          
+          // Change button text
+          fullscreenBtn.textContent = 'Exit Fullscreen';
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+          } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+          } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+          }
+          
+          // Change button text
+          fullscreenBtn.textContent = 'Enter Fullscreen';
         }
       }
 
-      // Auto-enter fullscreen on game start for better experience
-      window.addEventListener('load', function() {
-        // Attempt to make the canvas take up the full screen
-        canvas.style.position = 'fixed';
-        canvas.style.top = '0';
-        canvas.style.left = '0';
-        canvas.style.width = '100%';
-        canvas.style.height = '100%';
-      });
+      // Add event listener to the fullscreen button
+      fullscreenBtn.addEventListener('click', requestFullscreen);
+
+      // Update button text when fullscreen changes
+      document.addEventListener('fullscreenchange', handleFullscreenChange);
+      document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+      function handleFullscreenChange() {
+        if (document.fullscreenElement || 
+            document.webkitFullscreenElement || 
+            document.mozFullScreenElement || 
+            document.msFullscreenElement) {
+          fullscreenBtn.textContent = 'Exit Fullscreen';
+        } else {
+          fullscreenBtn.textContent = 'Enter Fullscreen';
+        }
+      }
 
       // Handle game loading progress
       function showProgress(value, message) {
