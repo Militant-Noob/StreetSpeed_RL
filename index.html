@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="style.css">
   </head>
   <body>
+    <!-- Background image for desktop only -->
+    <div id="bg-image" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url('BG.png') no-repeat center center; background-size: cover; z-index: -100; opacity: 0.7;"></div>
+    
     <div id="unity-container" class="unity-desktop">
       <canvas id="unity-canvas" width=1920 height=1080 tabindex="-1"></canvas>
       <div id="unity-loading-bar">
@@ -19,15 +22,18 @@
       <div id="unity-warning"> </div>
       <div id="unity-footer">
         <div id="unity-logo-title-footer"></div>
-        <div id="unity-fullscreen-button"></div>
         <div id="unity-build-title">StreetSpeed RL</div>
       </div>
     </div>
+    
+    <!-- Fullscreen button below the canvas -->
+    <button id="fullscreen-btn">Enter Fullscreen</button>
 
     <script>
       var canvas = document.querySelector("#unity-canvas");
       var container = document.querySelector("#unity-container");
-
+      var fullscreenBtn = document.getElementById("fullscreen-btn");
+      
       // Create the makeFullscreen function to match the working template
       document.makeFullscreen = function(elementOrId) {
         var element = elementOrId;
@@ -94,6 +100,11 @@
 
       if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
         // Mobile device style: fill the whole browser client area with the game canvas:
+        var bgImage = document.getElementById("bg-image");
+        if (bgImage) {
+          bgImage.style.display = "none";
+        }
+        
         var meta = document.createElement('meta');
         meta.name = 'viewport';
         meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
@@ -120,9 +131,47 @@
           document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
         }).then((unityInstance) => {
           document.querySelector("#unity-loading-bar").style.display = "none";
-          document.querySelector("#unity-fullscreen-button").onclick = () => {
+          
+          // Add fullscreen button functionality
+          fullscreenBtn.addEventListener('click', function() {
             document.makeFullscreen('unity-container');
-          };
+            // Update button text
+            fullscreenBtn.textContent = 'Exit Fullscreen';
+          });
+          
+          // Handle ESC key to exit fullscreen
+          document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && document.fullscreenElement) {
+              if (document.exitFullscreen) {
+                document.exitFullscreen();
+              } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+              } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+              } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+              }
+              // Update button text
+              fullscreenBtn.textContent = 'Enter Fullscreen';
+            }
+          });
+          
+          // Update button text when fullscreen changes
+          document.addEventListener('fullscreenchange', handleFullscreenChange);
+          document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+          document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+          document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+          
+          function handleFullscreenChange() {
+            if (document.fullscreenElement || 
+                document.webkitFullscreenElement || 
+                document.mozFullScreenElement || 
+                document.msFullscreenElement) {
+              fullscreenBtn.textContent = 'Exit Fullscreen';
+            } else {
+              fullscreenBtn.textContent = 'Enter Fullscreen';
+            }
+          }
 
         }).catch((message) => {
           alert(message);

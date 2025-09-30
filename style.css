@@ -4,6 +4,8 @@ body {
   min-height: 100vh;
   font-family: Arial, sans-serif;
   overflow: hidden; /* Prevent scrollbars */
+  background: url('BG.png') no-repeat center center fixed;
+  background-size: cover;
 }
 #unity-container { 
   position: absolute;
@@ -14,7 +16,7 @@ body {
 }
 #unity-container.unity-desktop { left: 50%; top: 50%; transform: translate(-50%, -50%) }
 #unity-container.unity-mobile { position: fixed; width: 100%; height: 100% }
-#unity-canvas { background: #231F20 }
+#unity-canvas { background: url('BG.png') no-repeat center center; background-size: cover; }
 .unity-mobile #unity-canvas { width: 100%; height: 100% }
 #unity-loading-bar { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: none }
 #unity-logo { width: 154px; height: 130px; background: url('unity-logo-dark.png') no-repeat center }
@@ -24,5 +26,35 @@ body {
 .unity-mobile #unity-footer { display: none }
 #unity-logo-title-footer { float:left; width: 102px; height: 38px; background: url('unity-logo-title-footer.png') no-repeat center }
 #unity-build-title { float: right; margin-right: 10px; line-height: 38px; font-family: arial; font-size: 18px }
-#unity-fullscreen-button { cursor:pointer; float: right; width: 38px; height: 38px; background: url('fullscreen-button.png') no-repeat center }
 #unity-warning { position: absolute; left: 50%; top: 5%; transform: translate(-50%); background: white; padding: 10px; display: none }
+
+/* Fullscreen button styling */
+#fullscreen-btn {
+  position: absolute;
+  top: calc(50% + 540px + 20px); /* Position under the 1080px high canvas */
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 25px;
+  font-size: 16px;
+  background: linear-gradient(135deg, #00c9ff, #92fe9d);
+  color: #000;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  z-index: 20;
+}
+
+#fullscreen-btn:hover {
+  transform: translateX(-50%) translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  background: linear-gradient(135deg, #00e0ff, #a2ffad);
+}
+
+#fullscreen-btn:active {
+  transform: translateX(-50%) translateY(1px);
+}
